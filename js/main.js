@@ -545,7 +545,7 @@ cc.game.onStart = function(){
             onTouchEnded: function(touch, event){
 
               var target = event.getCurrentTarget();
-              cc.log("sprite onTouchesEnded.. ");
+              console.log("sprite onTouchesEnded.. ");
               target.setOpacity(255);
 
               var location = touch.getLocation();
@@ -591,6 +591,23 @@ cc.game.onStart = function(){
             swallowTouches: true,
             onTouchBegan: function(touch,event){
               console.log('grass touch begin');
+              
+              var target = event.getCurrentTarget();
+              var location = touch.getLocation();
+
+              var locationInNode = target.convertToNodeSpace(touch.getLocation());
+              var s = target.getContentSize();
+              var rect = cc.rect(0, 0, s.width, s.height);
+
+              if (cc.rectContainsPoint(rect, locationInNode)) {
+                console.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
+
+                startY = location.y;
+
+                return true;
+              };
+
+              return false;
             },
             onTouchMoved: function(touch,event){
               console.log('grass touch move');
