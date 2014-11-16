@@ -522,7 +522,7 @@ cc.game.onStart = function(){
               var rect = cc.rect(0, 0, s.width, s.height);
 
               if (cc.rectContainsPoint(rect, locationInNode)) {
-                console.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
+                //console.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
 
                 startY = location.y;
 
@@ -537,6 +537,8 @@ cc.game.onStart = function(){
 
             onTouchMoved: function(touch,event){
 
+              //console.log('sprite moved');
+
               var target = event.getCurrentTarget();
               var delta = touch.getDelta();
 
@@ -544,8 +546,10 @@ cc.game.onStart = function(){
 
             onTouchEnded: function(touch, event){
 
+              //console.log('sprite ended');
+
               var target = event.getCurrentTarget();
-              console.log("sprite onTouchesEnded.. ");
+              //console.log("sprite onTouchesEnded.. ");
               target.setOpacity(255);
 
               var location = touch.getLocation();
@@ -590,30 +594,24 @@ cc.game.onStart = function(){
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             swallowTouches: true,
             onTouchBegan: function(touch,event){
-              console.log('grass touch begin');
-              
+              //console.log('grass touch begin');
+
               var target = event.getCurrentTarget();
               var location = touch.getLocation();
+
+              //console.log(target);
 
               var locationInNode = target.convertToNodeSpace(touch.getLocation());
               var s = target.getContentSize();
               var rect = cc.rect(0, 0, s.width, s.height);
 
               if (cc.rectContainsPoint(rect, locationInNode)) {
-                console.log("sprite began... x = " + locationInNode.x + ", y = " + locationInNode.y);
-
                 startY = location.y;
 
                 return true;
               };
 
               return false;
-            },
-            onTouchMoved: function(touch,event){
-              console.log('grass touch move');
-            },
-            onTouchEnded: function(touch,event){
-              console.log('grass touch end');
             }
 
 
@@ -843,10 +841,10 @@ cc.game.onStart = function(){
 
           self.beetle.x = 600 * (1 - (timeCount / totalTimeCount));
 
-          // console.log(count);
+          // //console.log(count);
 
           if(timeCount >= totalTimeCount){
-            console.log('time up');
+            //console.log('time up');
 
             clearInterval(self.intervalTimer);
 
