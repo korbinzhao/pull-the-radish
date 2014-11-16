@@ -1,13 +1,3 @@
-var radishCount = 0,//拔出萝卜的数量
-	marmotBeatCount = 0,//敲打地鼠的数量
-  marmotPullCount = 0,//失误拔地鼠的数量
-	redPacketCount = 0,//拔出红包的数量
-  holeStatusArr = [],
-  timeCount = 0,//每过10毫秒计数累加一次
-  totalTimeCount = 6000 / 10,//总时间60秒，共计数60次
-	isInit = true;//是否是初始化页面
-
-
 cc.game.onStart = function(){
 
 	//全屏显示
@@ -20,6 +10,15 @@ cc.game.onStart = function(){
           this._super();
 
           var self = this;
+
+          self.radishCount = 0,//拔出萝卜的数量
+          self.marmotBeatCount = 0,//敲打地鼠的数量
+          self.marmotPullCount = 0,//失误拔地鼠的数量
+          self.redPacketCount = 0,//拔出红包的数量
+          self.holeStatusArr = [],
+          self.timeCount = 0,//每过10毫秒计数累加一次
+          self.totalTimeCount = 6000 / 10,//总时间60秒，共计数60次
+          self.isInit = true;//是否是初始化页面
 
           //director尺寸
           self.size = cc.director.getWinSize();
@@ -76,7 +75,7 @@ cc.game.onStart = function(){
             "MARMOT_RATE": 0.05,
             "RED_PACKET_RATE": 0.025,
             "STEP_TIME":300, //每隔多长时间出现一波萝卜精灵，单位毫秒ms
-            "JUMP_UP_TIME":1//萝卜等精灵跳出跳回所用时间，单位秒s
+            "JUMP_UP_TIME":1.2//萝卜等精灵跳出跳回所用时间，单位秒s
 
 
           }
@@ -143,12 +142,16 @@ cc.game.onStart = function(){
           self.addChild(self.beetle, 92);
 
           self.popUpRadish = cc.Sprite.create("images/popup-radish.png");
-          self.popUpRadish.setPosition(self.size.width/2, self.size.height/2);
+          self.popUpRadish.setPosition(self.size.width/2, self.size.height/2 + 180);
           self.addChild(self.popUpRadish, -1);
 
           self.popUpRedPacket = cc.Sprite.create("images/popup-red-packet.png");
-          self.popUpRedPacket.setPosition(self.size.width, self.size.height);
+          self.popUpRedPacket.setPosition(self.size.width/2, self.size.height/2 + 180);
           self.addChild(self.popUpRedPacket, -1);
+
+          self.restart = cc.Sprite.create("images/restart.png");
+          self.restart.setPosition(self.size.width/2, self.size.height/2 - 200);
+          self.addChild(self.restart, -1);
 
           //创建萝卜精灵，共三种萝卜，每种9个
           //第一种萝卜
@@ -567,21 +570,21 @@ cc.game.onStart = function(){
                   break;
                   case 'radish':
                   if((endY - startY) > 10){
-                    radishCount++;
+                    self.radishCount++;
                     self.spriteJumpDisappear(target);
                   }
                   break;
                   case 'marmot':
                   if((endY - startY) <= 10){
-                    marmotBeatCount++;
+                    self.marmotBeatCount++;
                   }
                   else{
-                    marmotPullCount++;
+                    self.marmotPullCount++;
                   }
                   break;
                   case 'redPacket':
                   if((endY - startY) > 10){
-                    redPacketCount++;
+                    self.redPacketCount++;
                     self.spriteJumpDisappear(target);
                   }
                   break;
@@ -616,6 +619,39 @@ cc.game.onStart = function(){
 
 
           });
+
+        var restartTouchListener = cc.EventListener.create({
+          event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            swallowTouches: true,
+            onTouchBegan: function(touch,event){
+              //console.log('grass touch begin');
+
+              var target = event.getCurrentTarget();
+              var location = touch.getLocation();
+
+              //console.log(target);
+
+              var locationInNode = target.convertToNodeSpace(touch.getLocation());
+              var s = target.getContentSize();
+              var rect = cc.rect(0, 0, s.width, s.height);
+
+              if (cc.rectContainsPoint(rect, locationInNode)) {
+                startY = location.y;
+
+                return true;
+              };
+
+              return false;
+            },
+
+            onTouchEnded: function(touch, event){
+              cc.director.runScene(new MyScene());
+              
+            }
+        });
+
+        //点击重新开始按钮，游戏重新开始
+        cc.eventManager.addListener(restartTouchListener, self.restart);
 
         //为背景草地添加空的touch事件，以避免touch草地时也会触发草地下隐藏的萝卜等sprite的touch事件？？？
         cc.eventManager.addListener(bgTouchListener, grass1);
@@ -748,8 +784,8 @@ cc.game.onStart = function(){
                     //控制sprite分批显现和消失
                     self.intervalTimer = setInterval(function(){
 
-                      if(isInit){
-                        isInit = false;
+                      if(self.isInit){
+                        self.isInit = false;
                         self.schedule(self.update, 0.1);//0.1秒执行一次update
                       }
 
@@ -781,7 +817,7 @@ cc.game.onStart = function(){
           var sprite = self.spriteArr[spriteClassName][holeNo],
               hole = self.holesArr[holeNo];
 
-          if(sprite.inAnimation || (true == holeStatusArr[hole])){
+          if(sprite.inAnimation || (true == self.holeStatusArr[hole])){
             return false;
           }
 
@@ -790,9 +826,9 @@ cc.game.onStart = function(){
           sprite.zIndex = self.GameConfig[hole].zIndex;
 
           sprite.inAnimation = true;
-          holeStatusArr[hole] = true;
+          self.holeStatusArr[hole] = true;
 
-          var actionUp = cc.jumpBy(1, cc.p(0, 0), 180, self.GameConfig.JUMP_UP_TIME);
+          var actionUp = cc.jumpBy(self.GameConfig.JUMP_UP_TIME, cc.p(0, 0), 180, 1);
           var action = cc.sequence(actionUp);
 
           sprite.runAction(action);
@@ -801,7 +837,7 @@ cc.game.onStart = function(){
 
           setTimeout(function(){
                 sprite.inAnimation = false;
-                holeStatusArr[hole] = false; 
+                self.holeStatusArr[hole] = false; 
           },durationTime);
 
           
@@ -835,41 +871,65 @@ cc.game.onStart = function(){
         update: function(){
           var self = this;
 
-          timeCount++;
+          self.timeCount++;
 
-          self.timeBar.setScaleX(timeCount / totalTimeCount);
+          self.timeBar.setScaleX(self.timeCount / self.totalTimeCount);
 
-          self.beetle.x = 600 * (1 - (timeCount / totalTimeCount));
+          self.beetle.x = 600 * (1 - (self.timeCount / self.totalTimeCount));
 
           // //console.log(count);
 
-          if(timeCount >= totalTimeCount){
+          if(self.timeCount >= self.totalTimeCount){
             //console.log('time up');
 
             clearInterval(self.intervalTimer);
+
+            self.unscheduleAllCallbacks();
 
             var layer = new cc.LayerColor(cc.color(0, 0, 0, 128));
             layer.setContentSize(self.size.width, self.size.height);
             layer.x = 0;
             layer.y = 0;
-
             self.addChild(layer, 110);
 
-            self.popUpRadish.zIndex = 200;
+            if(self.redPacketCount == 0){
+              var radishPopLabel = new cc.LabelTTF('好可惜~没能拔出红包，你拔了'+ self.radishCount +'个萝卜！',  'Times New Roman', 32, cc.size(350,90), cc.TEXT_ALIGNMENT_CENTER);
+
+              this.addChild(radishPopLabel);
+              radishPopLabel.x = self.size.width / 2;
+              radishPopLabel.y = self.size.height / 2 - 100;
+              radishPopLabel.zIndex = 200;
+
+              self.popUpRadish.zIndex = 200;
+              self.restart.zIndex = 200;
+            }
+
+          }
+          else if(self.redPacketCount > 0){
+            clearInterval(self.intervalTimer);
 
             self.unscheduleAllCallbacks();
 
-          }
+            var layer = new cc.LayerColor(cc.color(0, 0, 0, 128));
+            layer.setContentSize(self.size.width, self.size.height);
+            layer.x = 0;
+            layer.y = 0;
+            self.addChild(layer, 110);
 
+            var redPacketPopLabel = new cc.LabelTTF('恭喜你！\n拔萝卜拔出50元红包！',  'Times New Roman', 32, cc.size(350,90), cc.TEXT_ALIGNMENT_CENTER);
+
+            self.addChild(redPacketPopLabel);
+            redPacketPopLabel.x = self.size.width/2;
+            redPacketPopLabel.y = self.size.height/2 - 100;
+            redPacketPopLabel.zIndex = 200;
+
+            self.popUpRedPacket.zIndex = 200;
+            self.restart.zIndex = 200;
+          }
 
         }
 
-
-
-
       });
-
-
 
 		  cc.director.runScene(new MyScene());
 	}, this);
