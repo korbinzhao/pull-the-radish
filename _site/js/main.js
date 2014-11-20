@@ -577,11 +577,9 @@ cc.game.onStart = function(){
                   case 'marmot':
                   if((endY - startY) <= 10){
                     self.marmotBeatCount++;
-                    console.log('marmotBeatCount: ' + self.marmotBeatCount);
                   }
                   else{
                     self.marmotPullCount++;
-                    console.log('marmotPullCount: ' + self.marmotPullCount);
                   }
                   break;
                   case 'redPacket':
@@ -736,7 +734,7 @@ cc.game.onStart = function(){
 
           self.holesArr = ['hole1','hole2','hole3','hole4','hole5','hole6','hole7','hole8','hole9'];
 
-            self.statusArr = [];//精灵依次出现的数组
+            self.statusArr = [];
 
             var SIMULATION_NUM = 1000;
 
@@ -823,18 +821,6 @@ cc.game.onStart = function(){
             return false;
           }
 
-          var animTime = 0;
-
-          if('radish' == sprite.group){
-            animTime = 160;
-          }
-          else if('redPacket' == sprite.group){
-            animTime = 200;
-          }
-          else if('marmot' == sprite.group){
-            animTime = 200;
-          }
-
           sprite.x = self.GameConfig[hole].x;
           sprite.y = self.GameConfig[hole].y;
           sprite.zIndex = self.GameConfig[hole].zIndex;
@@ -842,7 +828,7 @@ cc.game.onStart = function(){
           sprite.inAnimation = true;
           self.holeStatusArr[hole] = true;
 
-          var actionUp = cc.jumpBy(self.GameConfig.JUMP_UP_TIME, cc.p(0, 0), animTime, 1);
+          var actionUp = cc.jumpBy(self.GameConfig.JUMP_UP_TIME, cc.p(0, 0), 180, 1);
           var action = cc.sequence(actionUp);
 
           sprite.runAction(action);
@@ -887,17 +873,13 @@ cc.game.onStart = function(){
 
           self.timeCount++;
 
-          //时间轴甲虫移动进度，每失误拔一个地鼠则扣除10秒时间,每成功敲打依次地鼠则奖励10秒时间
-          var progressCount = self.timeCount +　10 * self.marmotPullCount - 10 * self.marmotBeatCount; 
+          self.timeBar.setScaleX(self.timeCount / self.totalTimeCount);
 
-          self.timeBar.setScaleX(progressCount / self.totalTimeCount);
-
-          //控制时间轴上甲虫的移动
-          self.beetle.x = 600 * (1 - (progressCount / self.totalTimeCount));
+          self.beetle.x = 600 * (1 - (self.timeCount / self.totalTimeCount));
 
           // //console.log(count);
 
-          if(progressCount >= self.totalTimeCount){
+          if(self.timeCount >= self.totalTimeCount){
             //console.log('time up');
 
             clearInterval(self.intervalTimer);
