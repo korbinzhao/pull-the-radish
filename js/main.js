@@ -823,16 +823,16 @@ cc.game.onStart = function(){
             return false;
           }
 
-          var animTime = 0;
+          var animHeight = 0;//不同种类精灵在跳出时跳出的高度
 
           if('radish' == sprite.group){
-            animTime = 160;
+            animHeight = 160;
           }
           else if('redPacket' == sprite.group){
-            animTime = 200;
+            animHeight = 200;
           }
           else if('marmot' == sprite.group){
-            animTime = 200;
+            animHeight = 240;
           }
 
           sprite.x = self.GameConfig[hole].x;
@@ -842,7 +842,7 @@ cc.game.onStart = function(){
           sprite.inAnimation = true;
           self.holeStatusArr[hole] = true;
 
-          var actionUp = cc.jumpBy(self.GameConfig.JUMP_UP_TIME, cc.p(0, 0), animTime, 1);
+          var actionUp = cc.jumpBy(self.GameConfig.JUMP_UP_TIME, cc.p(0, 0), animHeight, 1);
           var action = cc.sequence(actionUp);
 
           sprite.runAction(action);
